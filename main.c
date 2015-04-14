@@ -1,5 +1,3 @@
-#include <epoxy/gl.h>
-#include <epoxy/glx.h>
 #include <GLFW/glfw3.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -93,7 +91,6 @@ int main(int argc, char **argv) {
         glfwPollEvents();
         for (int i = 0; i < window_count; i += 1) {
             glfwMakeContextCurrent(windows[i]);
-            glFlush();
         }
         for (int i = 0; i < window_count; i += 1) {
             glfwSwapBuffers(windows[i]);
