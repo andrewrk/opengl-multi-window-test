@@ -4,10 +4,31 @@ This repository is to figure out the answer to this question:
 
 http://stackoverflow.com/questions/29617370/multiple-opengl-contexts-multiple-windows-multithreading-and-vsync
 
-## Building And Running
+## Building
+
+### Linux
 
 ```
 clang -Werror -Wall -g -o multi-window-test main.c -lglfw -pthread
+```
+
+### OSX
+
+```
+clang -Werror -Wall -g -o multi-window-test main.c -lglfw3 -pthread
+```
+
+### Windows
+
+Use [mxe](http://mxe.cc/).
+
+```
+i686-w64-mingw32.static-gcc -std=c99 -mconsole -mwindows -o multi-window-test.exe main.c -lglfw3 -pthread -lopengl32
+```
+
+## Running
+
+```
 ./multi-window-test --windows 6
 ```
 
