@@ -18,3 +18,5 @@ Now watch stderr and see the fps reported should be really close to 60, not
 
  * Linux, X11, 4.4.0 NVIDIA 346.47 (2015-04-13)
    - frame rate is 60fps no matter how many windows are open.
+ * OSX 10.9.5 (2015-04-13)
+   - frame rate is not capped; swap buffers is not blocking.
