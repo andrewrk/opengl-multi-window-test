@@ -34,8 +34,3 @@ i686-w64-mingw32.static-gcc -std=c99 -mconsole -mwindows -o multi-window-test.ex
 
 Now watch stderr and see the fps reported should be really close to 60, not
 60 / (whatever you set --windows to)
-
-## Results
-
- * Linux, X11, 4.4.0 NVIDIA 346.47 (2015-04-13)
-   - frame rate is 60fps no matter how many windows are open.
