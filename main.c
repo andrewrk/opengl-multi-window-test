@@ -30,6 +30,9 @@ static int print_usage(char *arg0) {
 struct RunningWindow {
     pthread_t thread;
     GLFWwindow *window;
+    int id;
+    int frame_count;
+    double fps;
 };
 
 volatile bool running = true;
@@ -38,8 +41,19 @@ static void *window_thread_run(void *arg) {
     struct RunningWindow *running_window = arg;
     glfwMakeContextCurrent(running_window->window);
     glfwSwapInterval(1);
+    double last_time = glfwGetTime();
+    running_window->fps = 60.0;
     while (running) {
         glfwSwapBuffers(running_window->window);
+        running_window->frame_count += 1;
+        double this_time = glfwGetTime();
+        double delta = this_time - last_time;
+        last_time = this_time;
+        double fps = 1.0 / delta;
+        running_window->fps = running_window->fps * 0.90 + fps * 0.10;
+        if (running_window->id == 0 && running_window->frame_count % 60 == 0) {
+            fprintf(stderr, "fps: %.2f\n", running_window->fps);
+        }
     }
 
     return NULL;
@@ -96,6 +110,7 @@ int main(int argc, char **argv) {
     for (int i = 0; i < window_count; i += 1) {
         struct RunningWindow *running_window = &running_windows[i];
         running_window->window = glfwCreateWindow(800, 600, "test", NULL, running_windows[0].window);
+        running_window->id = i;
         glfwSetWindowUserPointer(running_window->window, running_window);
         if (pthread_create(&running_window->thread, NULL, window_thread_run, running_window))
             panic("pthread_create failed");
