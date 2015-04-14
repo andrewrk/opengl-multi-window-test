@@ -9,13 +9,13 @@ http://stackoverflow.com/questions/29617370/multiple-opengl-contexts-multiple-wi
 ### Linux
 
 ```
-clang -Werror -Wall -g -o multi-window-test main.c -lglfw -pthread
+clang -Werror -Wall -g -o multi-window-test main.c -lglfw -lepoxy -pthread
 ```
 
 ### OSX
 
 ```
-clang -Werror -Wall -g -o multi-window-test main.c -lglfw3 -pthread
+clang -Werror -Wall -g -o multi-window-test main.c -lglfw3 -lepoxy -pthread
 ```
 
 ### Windows
@@ -23,7 +23,7 @@ clang -Werror -Wall -g -o multi-window-test main.c -lglfw3 -pthread
 Use [mxe](http://mxe.cc/).
 
 ```
-i686-w64-mingw32.static-gcc -std=c99 -mconsole -mwindows -o multi-window-test.exe main.c -lglfw3 -pthread -lopengl32
+i686-w64-mingw32.static-gcc -std=c99 -mconsole -mwindows -o multi-window-test.exe main.c -lepoxy -lglfw3 -pthread -lopengl32
 ```
 
 ## Running

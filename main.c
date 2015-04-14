@@ -1,3 +1,5 @@
+#include <epoxy/gl.h>
+#include <epoxy/glx.h>
 #include <GLFW/glfw3.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -5,7 +7,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
-#include <pthread.h>
 
 __attribute__ ((noreturn))
 __attribute__ ((format (printf, 1, 2)))
@@ -27,41 +28,10 @@ static int print_usage(char *arg0) {
     return 1;
 }
 
-struct RunningWindow {
-    pthread_t thread;
-    GLFWwindow *window;
-    int id;
-    int frame_count;
-    double fps;
-};
-
 volatile bool running = true;
-
-static void *window_thread_run(void *arg) {
-    struct RunningWindow *running_window = arg;
-    glfwMakeContextCurrent(running_window->window);
-    glfwSwapInterval(1);
-    double last_time = glfwGetTime();
-    running_window->fps = 60.0;
-    while (running) {
-        glfwSwapBuffers(running_window->window);
-        running_window->frame_count += 1;
-        double this_time = glfwGetTime();
-        double delta = this_time - last_time;
-        last_time = this_time;
-        double fps = 1.0 / delta;
-        running_window->fps = running_window->fps * 0.90 + fps * 0.10;
-        if (running_window->id == 0 && running_window->frame_count % 60 == 0) {
-            fprintf(stderr, "fps: %.2f\n", running_window->fps);
-        }
-    }
-
-    return NULL;
-}
 
 static void window_close_callback(GLFWwindow *window) {
     running = false;
-    glfwPostEmptyEvent();
 }
 
 int main(int argc, char **argv) {
@@ -106,25 +76,37 @@ int main(int argc, char **argv) {
     glfwWindowHint(GLFW_DECORATED, GL_TRUE);
     glfwWindowHint(GLFW_FOCUSED, GL_TRUE);
 
-    struct RunningWindow *running_windows = calloc(window_count, sizeof(struct RunningWindow));
+    GLFWwindow **windows = calloc(window_count, sizeof(GLFWwindow *));
     for (int i = 0; i < window_count; i += 1) {
-        struct RunningWindow *running_window = &running_windows[i];
-        running_window->window = glfwCreateWindow(800, 600, "test", NULL, running_windows[0].window);
-        running_window->id = i;
-        glfwSetWindowUserPointer(running_window->window, running_window);
-        if (pthread_create(&running_window->thread, NULL, window_thread_run, running_window))
-            panic("pthread_create failed");
-
-        glfwSetWindowCloseCallback(running_window->window, window_close_callback);
+        windows[i] = glfwCreateWindow(800, 600, "test", NULL, windows[0]);
+        if (!windows[i])
+            panic("unable to create window");
+        glfwMakeContextCurrent(windows[i]);
+        glfwSwapInterval(1);
+        glfwSetWindowCloseCallback(windows[i], window_close_callback);
     }
 
+    double last_time = glfwGetTime();
+    double fps = 60.0;
+    int frame_count = 0;
     while (running) {
-        glfwWaitEvents();
-    }
-
-    for (int i = 0; i < window_count; i += 1) {
-        struct RunningWindow *running_window = &running_windows[i];
-        pthread_join(running_window->thread, NULL);
+        glfwPollEvents();
+        for (int i = 0; i < window_count; i += 1) {
+            glfwMakeContextCurrent(windows[i]);
+            glFlush();
+        }
+        for (int i = 0; i < window_count; i += 1) {
+            glfwSwapBuffers(windows[i]);
+        }
+        frame_count += 1;
+        double this_time = glfwGetTime();
+        double delta = this_time - last_time;
+        last_time = this_time;
+        double this_fps = 1.0 / delta;
+        fps = fps * 0.90 + this_fps * 0.10;
+        if (frame_count % 60 == 0) {
+            fprintf(stderr, "fps: %.2f\n", fps);
+        }
     }
 
     glfwTerminate();
